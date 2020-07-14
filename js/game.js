@@ -1,13 +1,14 @@
 const canvas = document.getElementById("gameScreen");
 const ctx = canvas.getContext("2d");
 
-// Setting global variables
+// GLOBAL VARIABLES (or constants)
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 400;
 const groundHeight = 70;
-var speed = 3.8;
+var speed = 4.5;
+var acceleration = 1.2;
 
-
+// RAPTOR
 var raptor = {
     height : 80,
     width : 50,
@@ -15,7 +16,7 @@ var raptor = {
     y : 0,
     // calculate the y position  
     set_y : function () {this.y = (CANVAS_HEIGHT - this.height - groundHeight);},
-    color: "#757575",
+    color: "#9e9e9e",
 
     draw : function () {
         ctx.fillStyle = this.color;
@@ -24,35 +25,49 @@ var raptor = {
 }
 raptor.set_y();
 
+// CACTUS
 var cactus = {
     width: 20,
     height : 50,
-    color : "#388e3c",
-    offset : CANVAS_WIDTH, 
+    x : CANVAS_WIDTH, 
+    y : 0,
 
+    set_y : function () {this.y = (CANVAS_HEIGHT - this.height - groundHeight);},
+    color : "#a4a4a4",
+    
     draw : function () {
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.offset, CANVAS_HEIGHT - this.height - groundHeight, this.width, this.height);
+        ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 }
+cactus.set_y();
 
-// FLAGS NECCESARY FOR THE JUMPING MECHANICS
+// DRAW GROUND
+function drawGround() {
+    ctx.fillStyle = "#757575";
+    ctx.fillRect(0,CANVAS_HEIGHT - groundHeight, CANVAS_WIDTH, groundHeight);
+}
 
-// has the jumping process began
+
+// VARIABLES NECCESARY FOR THE JUMPING MECHANICS
+
+// has the jumping process begun
 var jumping = false;
 // how far in the air is the object
 var jumpHeight = 0;
 // is it ascending (ascend=true, descend or stationary=false)
 var ascend = false
 // physics
-var fallVelocity = 5;
+var maxFallVelocity = 5.9;
+var fallVelocity = maxFallVelocity;
 var maxJumpHeight = 100;
 var gravity = 0.985;
 
+// Spacebar listener
 window.addEventListener("keydown", function jumpInit () { 
     if (this.event.keyCode == 32) {
-        if(jumping && !ascend) {
-
+        if (jumping && !ascend) {
+            //if the jumping hasn't begun and ascend is set to false, just ignore the spacebar keypress
         } else {
             jumping = true;
             ascend = true;
@@ -63,13 +78,18 @@ window.addEventListener("keydown", function jumpInit () {
 function gameLoop() {
 
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    drawGround();
     raptor.draw();
     cactus.draw();
-    cactus.offset -= speed;
-    if(cactus.offset < 0) {
-        cactus.offset = CANVAS_WIDTH;
+
+    cactus.x -= speed;
+    
+    if(cactus.x < 0) {
+        cactus.x = CANVAS_WIDTH;
+        speed *= acceleration;
     }
-    // jumping mechanics
+
+    // JUMPING MECHANICS
     if(jumping && ascend) {
         raptor.y -= fallVelocity;
         jumpHeight += fallVelocity;
@@ -85,13 +105,21 @@ function gameLoop() {
         fallVelocity /= gravity;
     }
     if (jumping && jumpHeight <= 0) {
+        // landing on the ground
         jumping = false;
         raptor.set_y();
-        fallVelocity = 5;
+        fallVelocity = maxFallVelocity;
     }
     
+    // COLLISION DETECTION
+    if( ( (raptor.x + raptor.width > cactus.x) && (raptor.x + raptor.width < cactus.x + cactus.width)) || ((raptor.x > cactus.x) && (raptor.x < cactus.x + cactus.width) ) ) {
+        if (raptor.y + raptor.height >= cactus.y ) {
+            return;
+        }
+    }
 
     requestAnimationFrame(gameLoop);
 }
 
 gameLoop();
+
