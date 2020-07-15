@@ -89,7 +89,7 @@ function gameLoop() {
         speed += speed * acceleration;
     }
 
-    // JUMPING MECHANICS
+    //// JUMPING MECHANICS ////
     if(jumping && ascend) {
         raptor.y -= fallVelocity;
         jumpHeight += fallVelocity;
@@ -113,7 +113,7 @@ function gameLoop() {
         fallVelocity = maxFallVelocity;
     }
     
-    // COLLISION DETECTION
+    //// COLLISION DETECTION ////
     if( ( (raptor.x + raptor.width > cactus.x) && (raptor.x + raptor.width < cactus.x + cactus.width)) || ((raptor.x > cactus.x) && (raptor.x < cactus.x + cactus.width) ) ) {
         if (raptor.y + raptor.height >= cactus.y ) {
             return;
