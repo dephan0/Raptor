@@ -5,8 +5,8 @@ const ctx = canvas.getContext("2d");
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 400;
 const groundHeight = 70;
-var speed = 4.5;
-var acceleration = 1.2;
+var speed = 4.7;
+var acceleration = 0.1;
 
 // RAPTOR
 var raptor = {
@@ -58,10 +58,10 @@ var jumpHeight = 0;
 // is it ascending (ascend=true, descend or stationary=false)
 var ascend = false
 // physics
-var maxFallVelocity = 5.9;
+var maxFallVelocity = 10;
 var fallVelocity = maxFallVelocity;
-var maxJumpHeight = 100;
-var gravity = 0.985;
+var lastFallVelocity = fallVelocity;
+var gravity = 0.6;
 
 // Spacebar listener
 window.addEventListener("keydown", function jumpInit () { 
@@ -86,23 +86,25 @@ function gameLoop() {
     
     if(cactus.x < 0) {
         cactus.x = CANVAS_WIDTH;
-        speed *= acceleration;
+        speed += speed * acceleration;
     }
 
     // JUMPING MECHANICS
     if(jumping && ascend) {
         raptor.y -= fallVelocity;
         jumpHeight += fallVelocity;
-        fallVelocity *= gravity;
+        lastFallVelocity = fallVelocity;
+        fallVelocity -= gravity;
     } 
-    if (jumpHeight >= maxJumpHeight) {
+    if (fallVelocity <= 0) {
         // now it starts descending 
         ascend = false;
+        fallVelocity = lastFallVelocity;
     }
     if (jumping && !ascend) {
         raptor.y += fallVelocity;
         jumpHeight -= fallVelocity;
-        fallVelocity /= gravity;
+        fallVelocity += gravity;
     }
     if (jumping && jumpHeight <= 0) {
         // landing on the ground
