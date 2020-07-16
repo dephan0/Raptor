@@ -5,8 +5,10 @@ const ctx = canvas.getContext("2d");
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 400;
 const groundHeight = 70;
+let score = 0;
 let speed = 4.7;
 let acceleration = 0.1;
+
 
 // RAPTOR
 var raptor = {
@@ -25,9 +27,10 @@ var raptor = {
 }
 raptor.set_y();
 
+
 // CACTUS
 var cactus = {
-    width: 20,
+    width: 15,
     height: 50,
     x: CANVAS_WIDTH,
     y: 0,
@@ -41,6 +44,16 @@ var cactus = {
     }
 }
 cactus.set_y();
+
+
+// DRAW SCORE
+function drawScore(points) {
+    ctx.font = "25px Monospace";
+    ctx.fillStyle = "#212121";
+    points = points.toFixed(0); // Round to the nearest integer
+    ctx.fillText(points, CANVAS_WIDTH - ctx.measureText(points).width - 40, 60);
+}
+
 
 // DRAW GROUND
 function drawGround() {
@@ -60,11 +73,13 @@ let fallVelocity = maxFallVelocity;
 let lastFallVelocity = fallVelocity;
 const gravity = 0.6;
 
-// Spacebar listener
+
+// SPACEBAR LISTENER
 window.addEventListener("keydown", function jumpInit() {
     if (this.event.keyCode == 32) {
         if (jumping && !ascend) {
-            //if the jumping has begun and ascend is set to false, just ignore the spacebar keypress
+            /* if the jumping has begun and ascend is set to false 
+               (raptor is falling), just ignore the spacebar keypress */
         } else {
             jumping = true;
             ascend = true;
@@ -76,6 +91,7 @@ function gameLoop() {
 
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     drawGround();
+    drawScore(score);
     raptor.draw();
     cactus.draw();
 
@@ -115,12 +131,15 @@ function gameLoop() {
     }
 
     //// COLLISION DETECTION ////
-    if (((raptor.x + raptor.width > cactus.x) && (raptor.x + raptor.width < cactus.x + cactus.width)) || ((raptor.x > cactus.x) && (raptor.x < cactus.x + cactus.width))) {
+    if (((raptor.x + raptor.width >= cactus.x) && (raptor.x + raptor.width <= cactus.x + cactus.width)) || ((raptor.x >= cactus.x) && (raptor.x <= cactus.x + cactus.width))) {
         if (raptor.y + raptor.height >= cactus.y) {
             return;
         }
     }
-
+    
+    // ADVANCE THE SCORE
+    score += speed/2;
+    
     requestAnimationFrame(gameLoop);
 }
 

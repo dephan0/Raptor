@@ -8,5 +8,8 @@ canvas {
     display: inline;
 }
 h2 {
+    font-size: 30px;
+    font-family: monospace;
+    color: #212121;
     text-align: center;
 }
